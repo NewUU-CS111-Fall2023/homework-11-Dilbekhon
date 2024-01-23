@@ -5,47 +5,44 @@
  */
 
 #include <iostream>
-#include <unordered_map>
+#include <string>
+#include <map>
 
-using namespace std;
-
-string decodeMessage(const string& key, const string& message) {
-    unordered_map<char, char> substitutionTable;
-    int index = 0;
-
-    for (char ch : key) {
-        if (isalpha(ch) && substitutionTable.find(tolower(ch)) == substitutionTable.end()) {
-            substitutionTable[tolower(ch)] = 'a' + index++;
-        }
+std::map<char, char> build_substitution_map(const std::string& key) {
+  std::map<char, char> substitution_map;
+  int index = 0;
+  for (char c : key) {
+    if (isalpha(c) && substitution_map.count(tolower(c)) == 0) {
+      substitution_map[tolower(c)] = 'a' + index++;
     }
+  }
+  return substitution_map;
+}
 
-    string decodedMessage;
-
-    for (char ch : message) {
-        if (isalpha(ch)) {
-            char original = islower(ch) ? ch : tolower(ch);
-            decodedMessage += substitutionTable[original];
-        } else if (ch == ' ') {
-            decodedMessage += ' ';
-        }
+std::string decode_message(const std::string& message, const std::map<char, char>& substitution_map) {
+  std::string decoded_message;
+  for (char c : message) {
+    if (isalpha(c)) {
+      char original = tolower(c);
+      decoded_message += substitution_map.count(original) > 0 ? substitution_map.at(original) : c;
+    } else {
+      decoded_message += c;
     }
-
-    return decodedMessage;
+  }
+  return decoded_message;
 }
 
 int main() {
+  std::string key, message;
+  std::cout << "Enter the key: ";
+  std::getline(std::cin, key);  // Allowing multi-word input
+  std::cout << "Enter the message: ";
+  std::getline(std::cin, message);  // Allowing multi-word input
 
-    string key1 = "the quick brown fox jumps over the lazy dog";
-    string message1 = "vkbs bs t suepuv";
+  std::map<char, char> substitution_map = build_substitution_map(key);
+  std::string decoded_message = decode_message(message, substitution_map);
 
-    string key2 = "eljuxhpwnyrdgtqkviszcfmabo";
-    string message2 = "zwx hnfx lqantp mnoeius ycgk vcnjrdb";
+  std::cout << "The decoded message is: " << decoded_message << std::endl;
 
-    string result1 = decodeMessage(key1, message1);
-    string result2 = decodeMessage(key2, message2);
-
-    cout << result1 << endl;  // Should print "this is a secret"
-    cout << result2 << endl;  // Should print "the five boxing wizards jump quickly"
-
-    return 0;
+  return 0;
 }
